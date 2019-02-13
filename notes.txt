@@ -1,2 +1,9 @@
 https://darksky.net/dev/account
 https://darksky.net/dev/docs#forecast-request
+
+
+You are required to display the message “Powered by Dark Sky” that 
+links to https://darksky.net/poweredby/ somewhere prominent in your app or service. 
+If attribution isn't for you, email sales@darksky.net for details about white labeling.
+
+http://api.ipstack.com/
