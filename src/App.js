@@ -5,36 +5,45 @@ import SmView from "./components/smview/SmView";
 import Footer from "./components/footer/Footer";
 import "./App.css";
 
-let ds_api_key = process.env.DARK_SKY_SECRET;
-let ip_api_key = process.env.IPSTACK_SECRET;
+//ksys
 
 class App extends Component {
   constructor(props) {
     super(props);
+    this.getData = this.getData.bind(this);
     this.generateOneDay = this.generateOneDay.bind(this);
     this.generateTenDay = this.generateTenDay.bind(this);
     this.state = {
-      today: new Date(),
-      tomorrow: null
+      data: null
     };
   }
-  generateOneDay = () => {
-    let location = fetch(
-      `api.ipstack.com/check?access_key=${ip_api_key}&output=json&fields=longitude,latitude`
+
+  getData(url) {
+    let data = fetch(
+      `https://api.apixu.com/v1/current.json?key=${apixu_key}&q=Sale lake City, UT`
     )
-      .then(response => {
-        console.log(response);
-        return response.json();
+      .then(res => {
+        console.log(res.clone().json());
+        return res.clone().json();
       })
-      .then(data => {
-        let longitude = data.longitude;
-        let latitude = data.latitude;
-        console.log(longitude);
-        return [latitude, longitude];
+      .then(current => {
+        console.log(
+          `You are in: ${current.location.name}, and the current temp is: ${
+            current.current.temp_f
+          }`
+        );
+        this.setState({ data: current });
+        return current;
       });
-    let url = `https://api.darksky.net/forecast/${ds_api_key}/${location[0]},${
-      location[1]
-    }`;
+  }
+  generateOneDay = () => {
+    let tenD = [];
+    let date = this.state.today;
+    for (let i = 0; i < 10; i++) {
+      tenD.append(<Sm-View content={date} />);
+      date.setDate(date.getDate() + 1);
+      console.log(date);
+    }
   };
   generateTenDay = () => {
     let tenD = [];
@@ -46,14 +55,27 @@ class App extends Component {
     }
   };
 
+  componentDidMount() {
+    let data = this.getData();
+  }
+
   render() {
-    let test = this.generateOneDay();
+    let { data } = this.state;
     return (
       <div className="App">
         <Header />
-        <Lg-View id="today" content={this.state.today} />
-        <Lg-View id="tomorrow" content={this.state.tomorrow} />
-        <div className="tenDay">{this.generateTenDay};</div>
+        <LgView id="today" content={data} />
+        <LgView id="tomorrow" content={null} />
+        <div className="tenDay">
+          {data ? (
+            <div>
+              You are currently in {data.location.name} and the temp is{" "}
+              {data.current.temp_f}.
+            </div>
+          ) : (
+            <div> Loading... </div>
+          )}
+        </div>
         <Footer />
       </div>
     );

@@ -6,6 +6,7 @@ export default class LgView extends React.Component {
     return (
       <div className="LgView">
         <p>This is the LgView. </p>
+        <p> </p>
       </div>
     );
   }

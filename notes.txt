@@ -7,3 +7,7 @@ links to https://darksky.net/poweredby/ somewhere prominent in your app or servi
 If attribution isn't for you, email sales@darksky.net for details about white labeling.
 
 http://api.ipstack.com/
+
+
+let apixu_key = "d0d11c2b8e864928b36162638192102";
+let ip_api_key = "e7cf71190d76913a7983a016fe359dec";
