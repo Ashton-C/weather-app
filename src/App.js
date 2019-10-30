@@ -4,79 +4,100 @@ import LgView from './components/lgview/LgView';
 import SmView from './components/smview/SmView';
 import Footer from './components/footer/Footer';
 import './App.css';
-import secrets from './secrets';
+
+let apixu_key = 'd0d11c2b8e864928b36162638192102';
+let ip_api_key = 'e7cf71190d76913a7983a016fe359dec';
 
 class App extends Component {
   constructor(props) {
     super(props);
-    this.getUrl = this.getUrl.bind(this);
-    this.generateOneDay = this.generateOneDay.bind(this);
-    this.generateTenDay = this.generateTenDay.bind(this);
+    this.getData = this.getData.bind(this);
     this.state = {
-      url: null,
-      today: new Date(),
-      tomorrow: null
+      data: {
+        location: {
+          name: '',
+          region: '',
+          country: '',
+          lat: 0,
+          lon: 0,
+          tz_id: '',
+          localtime_epoch: 0,
+          localtime: ''
+        },
+        current: {
+          last_updated_epoch: 0,
+          last_updated: '',
+          temp_c: 0,
+          temp_f: 0,
+          is_day: 0,
+          condition: { text: '', icon: '', code: 0 },
+          wind_mph: 0,
+          wind_kph: 0,
+          wind_degree: 0,
+          wind_dir: '',
+          pressure_mb: 0,
+          pressure_in: 0,
+          precip_mm: 0,
+          precip_in: 0,
+          humidity: 0,
+          cloud: 0,
+          feelslike_c: 0,
+          feelslike_f: 0,
+          vis_km: 0,
+          vis_miles: 0,
+          uv: 0
+        }
+      }
     };
   }
-  getUrl = () => {
-    let url = fetch(
-      `http://api.ipstack.com/check?access_key=${ip_api_key}&output=json&fields=longitude,latitude`
-    )
-      .then(response => {
-        return response.json();
-      })
-      .then(data => {
-        let longitude = data.longitude;
-        let latitude = data.latitude;
-        return [latitude, longitude];
-      })
-      .then(location => {
-        let url = `https://api.darksky.net/forecast/${darksky_secret}/${
-          location[0]
-        },${location[1]}`;
-        return url;
-      });
-    this.setState({ url: [url] });
-    console.log(url);
-    return url;
-  };
 
-  async getData(url) {
-    let data = fetch(await url).then(res => {
-      console.log(res.json());
-      return res;
-    });
+  getData() {
+    let lat,
+      long = navigator.geolocation.getCurrentPosition(this.getLoc);
+    console.log(lat, long);
+    let data = fetch(
+      `https://api.apixu.com/v1/current.json?key=${apixu_key}&q=auto:ip`
+    )
+      .then(res => {
+        console.log(res.clone().json());
+        return res.clone().json();
+      })
+      .then(current => {
+        console.log(
+          `You are in: ${current.location.name}, and the current temp is: ${
+            current.current.temp_f
+          }`
+        );
+        this.setState({ data: current });
+        return current;
+      });
   }
-  generateOneDay = () => {
-    let tenD = [];
-    let date = this.state.today;
-    for (let i = 0; i < 10; i++) {
-      tenD.append(<Sm-View content={date} />);
-      date.setDate(date.getDate() + 1);
-      console.log(date);
-    }
-  };
-  generateTenDay = () => {
-    let tenD = [];
-    let date = this.state.today;
-    for (let i = 0; i < 10; i++) {
-      tenD.append(<Sm-View content={date} />);
-      date.setDate(date.getDate() + 1);
-      console.log(date);
-    }
+
+  getLoc = position => {
+    return [position.coords.latitude, position.coords.longitude];
   };
 
   componentDidMount() {
-    let data = this.getData(this.getUrl());
+    let data = this.getData();
   }
 
   render() {
+    let { data } = this.state;
+    console.log(data);
     return (
       <div className="App">
         <Header />
-        <Lg-View id="today" content={this.state.today} />
-        <Lg-View id="tomorrow" content={this.state.tomorrow} />
-        <div className="tenDay">{this.generateTenDay};</div>
+        <LgView id="today" content={data} />
+        <div className="tenDay">
+          {data ? (
+            <div>
+              You are currently in {data.location.name} and the temp is{' '}
+              {data.current.temp_f}.
+            </div>
+          ) : (
+            <div> Loading... </div>
+          )}
+        </div>
         <Footer />
       </div>
     );
